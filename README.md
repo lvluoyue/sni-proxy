@@ -1,8 +1,5 @@
 # SNI 动态路由代理
 基于 TLS Hello包中的 SNI 信息实时解析并转发至目标服务端口。
-- [x] 支持多域名转发
-- [x] 动态 DNS 配置
-- [x] 异步高并发处理
 
 ## 环境准备
 - php 8.1+
@@ -26,6 +23,30 @@ _b.example.com  ip=127.0.0.1;port=5001  // TXT 记录
 
 ## 自定义路由
 本项目采用dns管理转发的服务器及端口，可以通过更改parseHost方法来实现自定义逻辑。
+
+## 架构图
+```mermaid
+graph TD
+subgraph Clients
+C1[client①] -->|a.example.com| S(Server 7000)
+C2[client②] -->|a.example.com| S(Server 7000)
+C3[client③] -->|b.example.com| S(Server 7000)
+C4[client④] -->|b.example.com| S(Server 7000)
+C5[client⑤] -->|c.example.com| S(Server 7000)
+C6[client⑥] -->|c.example.com| S(Server 7000)
+C7[client⑦] -->|d.example.com| S(Server 7000)
+end
+S(Server 7000) -->|SNI: a.example.com| D1(DNS TXT: _a.example.com)
+S(Server 7000) -->|SNI: b.example.com| D2(DNS TXT: _b.example.com)
+S(Server 7000) -->|SNI: c.example.com| D3(DNS TXT: _c.example.com)
+S(Server 7000) -->|SNI: d.example.com| D4(DNS TXT: _d.example.com)
+
+D1 -->|ip=127.0.0.1;port=5000| T1(Target Service 5000)
+D2 -->|ip=127.0.0.1;port=5001| T2(Target Service 5001)
+D3 -->|ip=127.0.0.1;port=5002| T3(Target Service 5002)
+D4 -->|ip=127.0.0.1;port=5003| T4(Target Service 5003)
+
+```
 
 ## 特别感谢
 - [workerman](https://github.com/walkor/workerman)
